@@ -20,7 +20,10 @@ class postfix::params {
         default                  => 'bsd-mailx',
       }
 
-      $master_os_template = "${module_name}/master.cf.debian.erb"
+      $master_os_template = $::lsbdistcodename ? {
+        'trusty' => "${module_name}/master.cf.ubuntu14.04.erb",
+        default  => "${module_name}/master.cf.debian.erb",
+      }
     }
 
     'Suse': {
