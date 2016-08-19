@@ -7,6 +7,7 @@
 # [*name*]        - name of address postfix will lookup. See transport(5).
 # [*destination*] - where the emails will be delivered to. See transport(5).
 # [*ensure*]      - present/absent, defaults to present.
+# [*nexthop*]     - A string to define where and how to deliver the mail. See transport(5).
 #
 # === Requires
 #
@@ -17,19 +18,19 @@
 #
 # === Examples
 #
-#   node "toto.example.com" {
+#   node 'toto.example.com' {
 #
 #     include postfix
 #
-#     postfix::hash { "/etc/postfix/transport":
+#     postfix::hash { '/etc/postfix/transport':
 #       ensure => present,
 #     }
-#     postfix::config { "transport_maps":
-#       value => "hash:/etc/postfix/transport"
+#     postfix::config { 'transport_maps':
+#       value => 'hash:/etc/postfix/transport',
 #     }
-#     postfix::transport { "mailman.example.com":
+#     postfix::transport { 'mailman.example.com':
 #       ensure      => present,
-#       destination => "mailman",
+#       destination => 'mailman',
 #     }
 #   }
 #
@@ -39,7 +40,7 @@ define postfix::transport (
   $file='/etc/postfix/transport',
   $ensure='present'
 ) {
-  include postfix::augeas
+  include ::postfix::augeas
 
   validate_string($destination)
   validate_string($nexthop)

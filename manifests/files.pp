@@ -1,5 +1,5 @@
 class postfix::files {
-  include postfix::params
+  include ::postfix::params
 
   $alias_maps          = $postfix::all_alias_maps
   $inet_interfaces     = $postfix::inet_interfaces
@@ -9,6 +9,7 @@ class postfix::files {
   $master_smtps        = $postfix::master_smtps
   $master_submission   = $postfix::master_submission
   $myorigin            = $postfix::myorigin
+  $manage_root_alias   = $postfix::manage_root_alias
   $root_mail_recipient = $postfix::root_mail_recipient
   $smtp_listen         = $postfix::_smtp_listen
   $use_amavisd         = $postfix::use_amavisd
@@ -23,6 +24,7 @@ class postfix::files {
   file { '/etc/mailname':
     ensure  => 'file',
     content => "${::fqdn}\n",
+    mode    => '0644',
     seltype => $postfix::params::seltype,
   }
 
@@ -32,7 +34,7 @@ class postfix::files {
     content => "# file managed by puppet\n",
     notify  => Exec['newaliases'],
     replace => false,
-    seltype => $postfix::params::seltype,
+    seltype => $postfix::params::aliasesseltype,
   }
 
   # Aliases
@@ -90,8 +92,11 @@ class postfix::files {
     default: {}
   }
 
-  mailalias {'root':
-    recipient => $root_mail_recipient,
-    notify    => Exec['newaliases'],
+  if $manage_root_alias {
+    mailalias {'root':
+      recipient => $root_mail_recipient,
+      notify    => Exec['newaliases'],
+    }
   }
+
 }

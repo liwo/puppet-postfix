@@ -59,6 +59,10 @@
 #
 # [*use_sympa*]           - (boolean) Whether to setup for Sympa
 #
+# [*postfix_ensure*]      - (string) The ensure value of the postfix package
+#
+# [*mailx_ensure*]        - (string) The ensure value of the mailx package
+#
 # === Examples
 #
 #   class { 'postfix':
@@ -82,9 +86,10 @@ class postfix (
   $master_submission   = undef,         # postfix_master_submission
   $mta                 = false,
   $mydestination       = '$myorigin',   # postfix_mydestination
-  $mynetworks          = '127.0.0.0/8', # postfix_mynetworks
+  $mynetworks          = '127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128', # postfix_mynetworks
   $myorigin            = $::fqdn,
   $relayhost           = undef,         # postfix_relayhost
+  $manage_root_alias   = true,
   $root_mail_recipient = 'nobody',      # root_mail_recipient
   $satellite           = false,
   $smtp_listen         = '127.0.0.1',   # postfix_smtp_listen
@@ -92,12 +97,15 @@ class postfix (
   $use_dovecot_lda     = false,         # postfix_use_dovecot_lda
   $use_schleuder       = false,         # postfix_use_schleuder
   $use_sympa           = false,         # postfix_use_sympa
+  $postfix_ensure      = 'present',
+  $mailx_ensure        = 'present',
 ) inherits postfix::params {
 
 
   validate_bool($ldap)
   validate_bool($mailman)
   validate_bool($mta)
+  validate_bool($manage_root_alias)
   validate_bool($satellite)
   validate_bool($use_amavisd)
   validate_bool($use_dovecot_lda)
@@ -132,13 +140,14 @@ class postfix (
 
   $all_alias_maps = $ldap ? {
     false => $alias_maps,
-    true  => "\"${alias_maps}, ldap:/etc/postfix/ldap-aliases.cf\"",
+    true  => "${alias_maps}, ldap:/etc/postfix/ldap-aliases.cf",
   }
 
-  class { 'postfix::packages': } ->
-  class { 'postfix::files': } ~>
-  class { 'postfix::service': } ->
-  Class['postfix']
+  anchor { 'postfix::begin': } ->
+  class { '::postfix::packages': } ->
+  class { '::postfix::files': } ~>
+  class { '::postfix::service': } ->
+  anchor { 'posfix::end': }
 
   if $ldap {
     include ::postfix::ldap
@@ -161,8 +170,4 @@ class postfix (
   if $mailman {
     include ::postfix::mailman
   }
-
-  # Relationships
-  Postfix::Config <| |> ~> Class['postfix::service']
-  Class['postfix'] -> Postfix::Hash <| |>
 }
