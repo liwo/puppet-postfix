@@ -37,6 +37,7 @@ class postfix::params {
 
       $master_os_template = $::lsbdistcodename ? {
         'trusty' => "${module_name}/master.cf.ubuntu14.04.erb",
+        'xenial' => "${module_name}/master.cf.ubuntu16.04.erb",
         default  => "${module_name}/master.cf.debian.erb",
       }
     }
