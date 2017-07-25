@@ -1,3 +1,22 @@
+## 2016-11-17 - Release 1.5.0
+
+- Fix params validation + specs (GH #154)
+- Fix map calling in hash (GH #153)
+- Fix the path of the database (GH #149)
+- Add a map define to create postfix maps (#138)
+
+## 2016-08-23 - Release 1.4.0
+
+- Add manage_root_alias parameter to disable
+  management of root's mailalias resource (GH #133)
+- set mode 0644 for /etc/mailname (GH #142)
+- Fix virtual.db and transport.db creation (GH #135, GH #130)
+- Add $manage_mailx boolean to control
+  whether mailx is managed (GH #143, GH #141)
+- Add conffile define (GH #139)
+- Fix acceptance tests (GH #144)
+- Update test system
+
 ## 2016-03-16 - Release 1.3.1
 
 - Fix tests for Puppet 4

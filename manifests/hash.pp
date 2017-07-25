@@ -31,11 +31,8 @@ define postfix::hash (
   include ::postfix::params
 
   validate_absolute_path($name)
-#  validate_string($source)
-#  validate_string($content)
   if !is_string($source) and !is_array($source) { fail("value for source should be either String type or Array type got ${source}") }
   if !is_string($content) and !is_array($content) { fail("value for source should be either String type or Array type got ${content}") }
-  validate_string($ensure)
   validate_re($ensure, ['present', 'absent'],
     "\$ensure must be either 'present' or 'absent', got '${ensure}'")
 
@@ -47,40 +44,12 @@ define postfix::hash (
     fail 'You must provide either \'source\' or \'content\', not both'
   }
 
-  File {
-    mode    => '0600',
-    owner   => root,
-    group   => root,
-    seltype => $postfix::params::seltype,
-  }
-
-  file { $name:
+  postfix::map {$name:
     ensure  => $ensure,
     source  => $source,
     content => $content,
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
-    require => Package['postfix'],
-  }
-
-  file {"${name}.db":
-    ensure  => $ensure,
-    require => [File[$name], Exec["generate ${name}.db"]],
-  }
-
-  exec {"generate ${name}.db":
-    command => "postmap ${name}",
-    path    => $::path,
-    creates => "${name}.db", # this prevents postmap from being run !
-    require => File[$name],
-  }
-  exec {"regenerate ${name}.db":
-    command     => "postmap ${name}",
-    path        => $::path,
-    #creates    => "${name}.db", # this prevents postmap from being run !
-    subscribe   => File[$name],
-    refreshonly => true,
+    type    => 'hash',
+    path    => $name,
   }
 
   Class['postfix'] -> Postfix::Hash[$title]
